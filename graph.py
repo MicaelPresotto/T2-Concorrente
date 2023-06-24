@@ -31,12 +31,14 @@ def graph():
     matplotlib.pyplot.title('Gráfico speedup')
     matplotlib.pyplot.xlabel('n_threads')
     matplotlib.pyplot.ylabel('speedup')
-    for n_process in range(1, 5):
+    for n_process in range(1, 11):
         x, y = get_sample(n_process)
         for n_thread, t in zip(x, y):
             print(f"Tempo T({n_process}, {n_thread}): ", t)
         y = [serial_time / t for t in y]
-        matplotlib.pyplot.plot(x, y)
+        matplotlib.pyplot.plot(x, y, label=f'Processos: {n_process}')
+        
+    matplotlib.pyplot.legend()
     matplotlib.pyplot.show()
 
 if __name__ == "__main__":

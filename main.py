@@ -2,7 +2,7 @@ import os
 import argparse
 
 from multiprocessing import Process, current_process
-from threading import Thread, current_thread
+from threading import Thread, current_thread, lock
 
 def get_lines(sudoku):
     return [[f"L{i + 1}", *line] for i, line in enumerate(sudoku)]
@@ -19,7 +19,7 @@ def get_regions(sudoku):
                 regions[r].append(sudoku[l][c])
     return regions[:]
 
-def work_process(sudokus, n_threads):
+def work_process(sudokus, n_threads, indexes):
     threads = []
     for i, sudoku in enumerate(sudokus):
         sudoku_blocks = []
@@ -27,7 +27,7 @@ def work_process(sudokus, n_threads):
         sudoku_blocks.extend(get_columns(sudoku))
         sudoku_blocks.extend(get_regions(sudoku))
         
-        print(f"{current_process().name}: resolvendo quebra-cabeças {i + 1}")
+        print(f"{current_process().name}: resolvendo quebra-cabeças {indexes[i]+1}")
         thread_block = [[] for _ in range(len(sudoku_blocks))]
         [thread_block[j % n_threads].append(blocks) for j, blocks in enumerate(sudoku_blocks)]
         errors = {}
@@ -42,15 +42,19 @@ def work_process(sudokus, n_threads):
         dict_size = sum([len(errors[k]) for k in errors.keys()])
         msg_error = f"{current_process().name}: {dict_size} erros encontrados "
         if dict_size:
-            msg_error += "(" + "; ".join([t + ": " + ", ".join(errors[t]) for t in errors.keys()]) + ")"
+            msg_error += "(" + "; ".join([t + ": "  + ", ".join(errors[t]) for t in errors.keys()]) + ")"
         print(msg_error)
 
 def work_threads(blocks, errors):
     name = current_thread().name
     errors[name] = []
+    # ver de implementar lock pra acesso ao dicionario
     for block in blocks:
         if set(block[1:]) != {1,2,3,4,5,6,7,8,9}:
             errors[name].append(block[0])
+    if len(errors[name]) == 0:
+        errors.pop(name, None)
+
 
 def pos_int(value):
     pos_i = int(value)
@@ -88,9 +92,10 @@ def main():
     # Fazendo a divisao de trabalho das threads
     process_sudokus = [[] for _ in range(args.num_process)]
     [process_sudokus[i % args.num_process].append(sudoku) for i, sudoku in enumerate(sudokus)]
-
+    indexes_sudokus = [[] for _ in range(args.num_process)]
+    [indexes_sudokus[i % args.num_process].append(i) for i in range(len(sudokus))]
     # Iniciando os processos
-    process = [Process(name=f"Processo {i + 1}", target=work_process, args=(p_s, args.num_threads)) for i, p_s in enumerate(process_sudokus)]
+    process = [Process(name=f"Processo {i + 1}", target=work_process, args=(p_s, args.num_threads, indexes_sudokus[i],)) for i, p_s in enumerate(process_sudokus)]
     for p in process:
         p.start()
 

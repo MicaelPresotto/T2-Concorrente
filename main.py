@@ -21,22 +21,32 @@ def get_regions(sudoku):
     return regions[:]
 
 def work_process(sudokus, n_threads):
-    sudokus_blocks = [[] for _ in sudokus]
     threads = []
     for i, sudoku in enumerate(sudokus):
-        sudokus_blocks[i].extend(get_lines(sudoku))
-        sudokus_blocks[i].extend(get_columns(sudoku))
-        sudokus_blocks[i].extend(get_regions(sudoku))
-        thread = Thread(target=work_threads, args=(sudokus_blocks[i],))
-        thread.start()
-        threads.append(thread)
-
-    for thread in threads:
-        thread.join()
-
+        sudoku_blocks = []
+        sudoku_blocks.extend(get_lines(sudoku))
+        sudoku_blocks.extend(get_columns(sudoku))
+        sudoku_blocks.extend(get_regions(sudoku))
+        q = 27 // n_threads
+        r = 27 % n_threads
+        begin = 0
+        end = q
+        for _ in range(n_threads):
+            if r:
+                end+=1
+                r-=1
+            thread = Thread(target=work_threads, args=(sudoku_blocks[begin:end],))
+            thread.start()
+            threads.append(thread)
+            begin = end
+            end += q
+        for thread in threads:
+            thread.join()
 
 def work_threads(blocks):
-    print(blocks)
+    for block in blocks:
+        if set(block) != {1,2,3,4,5,6,7,8,9}:
+            pass
 
 def pos_int(value):
     pos_i = int(value)

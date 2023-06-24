@@ -20,7 +20,12 @@ def get_sample(n_process):
     return x[:], y[:]
 
 def graph():
-    serial_time = 1
+    start = time.time()
+    sys.argv = ["python", "-f", "input-sample.txt", "-e", "False"]
+    serial_solution()
+    end = time.time()
+    serial_time = end - start
+    
     matplotlib.pyplot.title('Gráfico speedup')
     matplotlib.pyplot.xlabel('n_threads')
     matplotlib.pyplot.ylabel('speedup')

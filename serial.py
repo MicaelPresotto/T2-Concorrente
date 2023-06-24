@@ -1,21 +1,8 @@
-from distutils.util import strtobool
 import os
 import argparse
 
-def get_lines(sudoku):
-    return [[f"L{i + 1}", *line] for i, line in enumerate(sudoku)]
-
-def get_columns(sudoku):
-    t = [[sudoku[l][c] for l in range(9)] for c in range(9)]
-    return [[f"C{i + 1}", *col] for i, col in enumerate(t)]
-
-def get_regions(sudoku):
-    regions = [[f"R{i + 1}", ] for i in range(9)]
-    for r in range(9):
-        for l in range((r // 3) * 3, (r // 3) * 3 + 3):
-            for c in range((r % 3) * 3, (r % 3) * 3 + 3):
-                regions[r].append(sudoku[l][c])
-    return regions[:]
+from distutils.util import strtobool
+from utils import *
 
 def worker(sudokus, enable_output):
     erros = [0,0,0,0]
@@ -31,15 +18,12 @@ def worker(sudokus, enable_output):
     if enable_output:
         for i,j in enumerate(erros):
             print(f"Sudoku {i+1}: {j} erros encontrados")
-    
-        
 
 def valid_file(file):
     if not os.path.exists(file):
         msg = "Valor recebido %s. Arquivo nao existe!" % file
         raise argparse.ArgumentTypeError(msg)
     return file
-
 
 def serial_solution():
     parser = argparse.ArgumentParser(add_help=True, description='Verificador de Sudoku Concorrente em Python')

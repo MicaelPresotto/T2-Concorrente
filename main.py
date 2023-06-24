@@ -2,7 +2,7 @@ import os
 import argparse
 
 from multiprocessing import Process, current_process
-from threading import Thread, current_thread, lock
+from threading import Thread, current_thread
 
 def get_lines(sudoku):
     return [[f"L{i + 1}", *line] for i, line in enumerate(sudoku)]
@@ -30,7 +30,7 @@ def work_process(sudokus, n_threads, indexes):
         print(f"{current_process().name}: resolvendo quebra-cabeças {indexes[i]+1}")
         thread_block = [[] for _ in range(len(sudoku_blocks))]
         [thread_block[j % n_threads].append(blocks) for j, blocks in enumerate(sudoku_blocks)]
-        errors = {}
+        errors = [[] for _ in range(n_threads)]
         for k in range(n_threads):
             thread = Thread(name=f"T{k}", target=work_threads, args=(thread_block[k][:], errors,))
             thread.start()
@@ -39,22 +39,17 @@ def work_process(sudokus, n_threads, indexes):
         for thread in threads:
             thread.join()
         
-        dict_size = sum([len(errors[k]) for k in errors.keys()])
+        dict_size = sum([len(error) for error in errors])
         msg_error = f"{current_process().name}: {dict_size} erros encontrados "
         if dict_size:
-            msg_error += "(" + "; ".join([t + ": "  + ", ".join(errors[t]) for t in errors.keys()]) + ")"
+            msg_error += "(" + "; ".join([f"T{i + 1}" + ": "  + ", ".join(error) for i, error in enumerate(errors)]) + ")"
         print(msg_error)
 
 def work_threads(blocks, errors):
     name = current_thread().name
-    errors[name] = []
-    # ver de implementar lock pra acesso ao dicionario
     for block in blocks:
         if set(block[1:]) != {1,2,3,4,5,6,7,8,9}:
-            errors[name].append(block[0])
-    if len(errors[name]) == 0:
-        errors.pop(name, None)
-
+            errors[int(name[1:]) - 1].append(block[0])
 
 def pos_int(value):
     pos_i = int(value)

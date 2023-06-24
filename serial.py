@@ -1,7 +1,7 @@
 
 
-def serial():
+def serial_solution():
     pass
 
 if __name__ == "__main__":
-    serial()
+    serial_solution()

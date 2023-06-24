@@ -51,6 +51,11 @@ def work_threads(blocks, errors):
         if set(block[1:]) != {1,2,3,4,5,6,7,8,9}:
             errors[int(name[1:]) - 1].append(block[0])
 
+    aux = [e.replace("R", "A").replace("C", "B").replace("L", "C") for e in errors[int(name[1:]) - 1]]
+    aux.sort()
+    aux = [e.replace("A", "R").replace("C", "L").replace("B", "C") for e in aux]
+    errors = aux[:]
+
 def pos_int(value):
     pos_i = int(value)
     if pos_i < 1:

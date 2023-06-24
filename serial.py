@@ -8,7 +8,7 @@ def worker(sudokus, enable_output):
     for i, sudoku in enumerate(sudokus):
         errors = []
         sudoku_blocks = []
-        sudoku_blocks.extend(get_lines(sudoku))
+        sudoku_blocks.extend(get_rows(sudoku))
         sudoku_blocks.extend(get_columns(sudoku))
         sudoku_blocks.extend(get_regions(sudoku))
         

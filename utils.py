@@ -1,6 +1,6 @@
 
 
-def get_lines(sudoku):
+def get_rows(sudoku):
     return [[f"L{i + 1}", *line] for i, line in enumerate(sudoku)]
 
 def get_columns(sudoku):

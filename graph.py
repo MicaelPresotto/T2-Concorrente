@@ -1,6 +1,7 @@
 import sys
 import time
 import matplotlib.pyplot
+
 from concurrent import concurrent_solution
 from serial import serial_solution
 
@@ -25,7 +26,7 @@ def graph():
     serial_solution()
     end = time.time()
     serial_time = end - start
-    
+
     matplotlib.pyplot.title('Gráfico speedup')
     matplotlib.pyplot.xlabel('n_threads')
     matplotlib.pyplot.ylabel('speedup')

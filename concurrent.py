@@ -29,15 +29,8 @@ def work_process(sudokus, n_threads, indexes, enable_output):
             thread.join()
         
         if enable_output:
-            dict_size = sum([len(error) for error in errors])
-            msg_error = f"{current_process().name}: {dict_size} erros encontrados "
-            if dict_size:
-                aux = []
-                for i, error in enumerate(errors):
-                    if len(error):
-                        aux.append(f"T{i + 1}: " + ", ".join(error))
-                msg_error += "(" + "; ".join(aux) + ")"
-            print(msg_error)
+            print_concurrent_errors(errors[:], current_process().name)
+            
 
 def work_threads(blocks, errors):
     name = current_thread().name

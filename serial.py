@@ -5,19 +5,22 @@ from distutils.util import strtobool
 from utils import *
 
 def worker(sudokus, enable_output):
-    erros = [0,0,0,0]
     for i, sudoku in enumerate(sudokus):
+        errors = []
         sudoku_blocks = []
         sudoku_blocks.extend(get_lines(sudoku))
         sudoku_blocks.extend(get_columns(sudoku))
         sudoku_blocks.extend(get_regions(sudoku))
+        
+        if enable_output:
+            print(f"Processo main: resolvendo quebra-cabeças {i}")
+
         for block in sudoku_blocks:
             if set(block[1:]) != {1,2,3,4,5,6,7,8,9}:
-                    erros[i] += 1
+                    errors.append(block[0])
 
-    if enable_output:
-        for i,j in enumerate(erros):
-            print(f"Sudoku {i+1}: {j} erros encontrados")
+        if enable_output:
+            print_serial_errors(errors[:])
 
 def valid_file(file):
     if not os.path.exists(file):

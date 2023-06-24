@@ -7,10 +7,10 @@ from multiprocessing import Process
 from threading import Thread
 
 def get_lines(sudoku):
-    return sudoku[:]
+    return [{"L"+i: l} for i,l in enumerate(sudoku)]
 
 def get_columns(sudoku):
-    return [[sudoku[l][c] for l in range(len(sudoku))] for c in range(len(sudoku))]
+    return [{"C"+c:[sudoku[l][c] for l in range(len(sudoku))]} for c in range(len(sudoku))]
 
 def get_regions(sudoku):
     regions = [[] for _ in range(9)]
@@ -18,7 +18,8 @@ def get_regions(sudoku):
         for l in range((r // 3) * 3, (r // 3) * 3 + 3):
             for c in range((r % 3) * 3, (r % 3) * 3 + 3):
                 regions[r].append(sudoku[l][c])
-    return regions[:]
+
+    return [{"R"+i: r} for i,r in enumerate(regions)]
 
 def work_process(sudokus, n_threads):
     threads = []
@@ -94,17 +95,5 @@ def main():
     for p in process:
         p.join()
 
-def make_graph():
-    pass
-
-if __name__ == '__main__':
-    for n_process in range(1, 10):
-        for n_thread in range(1, 10):
-            sys.argv = ["python3", 
-                        "-p", f"{n_process}",
-                        "-t", f"{n_thread}",
-                        "-f", "input-sample.txt"]
-            inicio = time.time()
-            main()
-            fim = time.time()
-            print(fim - inicio)
+if __name__ == "__main__":
+    main()

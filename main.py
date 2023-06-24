@@ -36,13 +36,17 @@ def work_process(sudokus, n_threads, indexes):
             thread.start()
             threads.append(thread)
 
-        for thread in threads:
+        for i, thread in enumerate(threads):
             thread.join()
         
         dict_size = sum([len(error) for error in errors])
         msg_error = f"{current_process().name}: {dict_size} erros encontrados "
         if dict_size:
-            msg_error += "(" + "; ".join([f"T{i + 1}" + ": "  + ", ".join(error) for i, error in enumerate(errors)]) + ")"
+            aux = []
+            for i, error in enumerate(errors):
+                if len(error):
+                    aux.append(f"T{i + 1}: " + ", ".join(error))
+            msg_error += "(" + "; ".join(aux) + ")"
         print(msg_error)
 
 def work_threads(blocks, errors):
@@ -69,7 +73,7 @@ def valid_file(file):
         raise argparse.ArgumentTypeError(msg)
     return file
 
-def main():
+def concurrent_solution():
     # Definindo os parametros do programa
     parser = argparse.ArgumentParser(add_help=True, description='Verificador de Sudoku Concorrente em Python')
 
@@ -104,4 +108,4 @@ def main():
         p.join()
 
 if __name__ == "__main__":
-    main()
+    concurrent_solution()

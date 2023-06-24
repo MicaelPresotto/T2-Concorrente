@@ -1,6 +1,6 @@
 import os
 import argparse
-
+from time import time
 from distutils.util import strtobool
 from utils import *
 
@@ -49,4 +49,7 @@ def serial_solution():
     worker(sudokus, args.enable_output)
 
 if __name__ == "__main__":
+    start = time()
     serial_solution()
+    end = time()
+    print("Time: ", end - start)

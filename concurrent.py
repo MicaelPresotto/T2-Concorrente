@@ -1,5 +1,6 @@
 import os
 import argparse
+from time import time
 
 from multiprocessing import Process, current_process
 from threading import Thread, current_thread
@@ -94,4 +95,7 @@ def concurrent_solution():
         p.join()
 
 if __name__ == "__main__":
+    start = time()
     concurrent_solution()
+    end = time()
+    print("Time:", end - start)

@@ -37,15 +37,16 @@ def work_process(sudokus, n_threads, shift, enable_output):
     locks = [Lock() for _ in range(n_threads)]
     lock_dones = Lock()
     lock_start = Lock()
+    errors = [[] for _ in range(n_threads)]
     for k in range(n_threads):
-        thread = Thread(name=f"T{k + 1}", target=work_threads, args=([blocks_per_sudokus_per_thread[i][k] for i in range(len(sudokus))], shift, enable_output, locks, lock_dones, lock_start))
+        thread = Thread(name=f"T{k + 1}", target=work_threads, args=([blocks_per_sudokus_per_thread[i][k] for i in range(len(sudokus))], shift, enable_output, locks, lock_dones, lock_start, errors))
         thread.start()
         threads.append(thread)
 
     for i, thread in enumerate(threads):
         thread.join()
 
-def work_threads(blocks_per_sudoku, shift, enable_output, locks, lock_done, lock_start):
+def work_threads(blocks_per_sudoku, shift, enable_output, locks, lock_done, lock_start, errors):
     global start
     global dones
     for i, blocks in enumerate(blocks_per_sudoku):
@@ -59,15 +60,21 @@ def work_threads(blocks_per_sudoku, shift, enable_output, locks, lock_done, lock
 
         for block in blocks:
             if set(block[1:]) != {1,2,3,4,5,6,7,8,9}:
-                pass
+                errors[int(current_thread().name[1:]) - 1].append(block[0])
+        aux = [e.replace("L", "A") for e in errors[int(current_thread().name[1:]) - 1]]
+        aux.sort()
+        aux = [e.replace("A", "L") for e in aux]
+        errors[int(current_thread().name[1:]) - 1] = aux[:]
 
         with lock_done:
             dones += 1
             if dones == len(locks):
                 if enable_output:
-                    print(f"{current_process().name}: finalizado o quebra-cabeças {i + shift + 1}")
+                    print_concurrent_errors(errors, current_process().name)
                 for lock in locks:
                     lock.release()
+                for error in errors:
+                    error.clear()
                 dones = 0
                 start = 0
 

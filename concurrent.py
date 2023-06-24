@@ -64,7 +64,6 @@ def concurrent_solution():
     parser.add_argument('-p', '--num-process', action='store', type=pos_int, required=True, help='O numero de processos trabalhadores')
     parser.add_argument('-t', '--num-threads', action='store', type=pos_int, required=True, help='O numero de threads de correcao a serem utilizadas por cada processo trabalhador')
     parser.add_argument('-e', '--enable_output', action="store", type=lambda x:bool(strtobool(x)), required=False, default=True,  help='Ativa oudesativa so prints')
-
     # Tratando eventuais erros de entrada
     try:
         args = parser.parse_args()
@@ -76,6 +75,9 @@ def concurrent_solution():
     sudokus = []
     with open(args.file_name) as file:
         sudokus = [[[int(e) for e in line] for line in sudoku.split("\n")] for sudoku in file.read().split("\n\n")]
+        
+    if args.num_process > len(sudokus):
+        args.num_process = len(sudokus)
 
     # Fazendo a divisao de trabalho das threads
     process_sudokus = [[] for _ in range(args.num_process)]

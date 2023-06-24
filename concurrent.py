@@ -3,6 +3,7 @@ import argparse
 
 from multiprocessing import Process, current_process
 from threading import Thread, current_thread
+from distutils.util import strtobool
 
 def get_lines(sudoku):
     return [[f"L{i + 1}", *line] for i, line in enumerate(sudoku)]
@@ -19,7 +20,7 @@ def get_regions(sudoku):
                 regions[r].append(sudoku[l][c])
     return regions[:]
 
-def work_process(sudokus, n_threads, indexes):
+def work_process(sudokus, n_threads, indexes, enable_output):
     threads = []
     for i, sudoku in enumerate(sudokus):
         sudoku_blocks = []
@@ -27,7 +28,9 @@ def work_process(sudokus, n_threads, indexes):
         sudoku_blocks.extend(get_columns(sudoku))
         sudoku_blocks.extend(get_regions(sudoku))
         
-        print(f"{current_process().name}: resolvendo quebra-cabeças {indexes[i]+1}")
+        if enable_output:
+            print(f"{current_process().name}: resolvendo quebra-cabeças {indexes[i]+1}")
+
         thread_block = [[] for _ in range(len(sudoku_blocks))]
         [thread_block[j % n_threads].append(blocks) for j, blocks in enumerate(sudoku_blocks)]
         errors = [[] for _ in range(n_threads)]
@@ -39,15 +42,16 @@ def work_process(sudokus, n_threads, indexes):
         for i, thread in enumerate(threads):
             thread.join()
         
-        dict_size = sum([len(error) for error in errors])
-        msg_error = f"{current_process().name}: {dict_size} erros encontrados "
-        if dict_size:
-            aux = []
-            for i, error in enumerate(errors):
-                if len(error):
-                    aux.append(f"T{i + 1}: " + ", ".join(error))
-            msg_error += "(" + "; ".join(aux) + ")"
-        print(msg_error)
+        if enable_output:
+            dict_size = sum([len(error) for error in errors])
+            msg_error = f"{current_process().name}: {dict_size} erros encontrados "
+            if dict_size:
+                aux = []
+                for i, error in enumerate(errors):
+                    if len(error):
+                        aux.append(f"T{i + 1}: " + ", ".join(error))
+                msg_error += "(" + "; ".join(aux) + ")"
+            print(msg_error)
 
 def work_threads(blocks, errors):
     name = current_thread().name
@@ -80,6 +84,7 @@ def concurrent_solution():
     parser.add_argument('-f', '--file-name', action='store', type=valid_file, required=True, help='O nome do arquivo com as solucoes a serem validadas')
     parser.add_argument('-p', '--num-process', action='store', type=pos_int, required=True, help='O numero de processos trabalhadores')
     parser.add_argument('-t', '--num-threads', action='store', type=pos_int, required=True, help='O numero de threads de correcao a serem utilizadas por cada processo trabalhador')
+    parser.add_argument('-e', '--enable_output', action="store", type=lambda x:bool(strtobool(x)), required=False, default=True,  help='Ativa oudesativa so prints')
 
     # Tratando eventuais erros de entrada
     try:
@@ -99,7 +104,7 @@ def concurrent_solution():
     indexes_sudokus = [[] for _ in range(args.num_process)]
     [indexes_sudokus[i % args.num_process].append(i) for i in range(len(sudokus))]
     # Iniciando os processos
-    process = [Process(name=f"Processo {i + 1}", target=work_process, args=(p_s, args.num_threads, indexes_sudokus[i],)) for i, p_s in enumerate(process_sudokus)]
+    process = [Process(name=f"Processo {i + 1}", target=work_process, args=(p_s, args.num_threads, indexes_sudokus[i], args.enable_output,)) for i, p_s in enumerate(process_sudokus)]
     for p in process:
         p.start()
 

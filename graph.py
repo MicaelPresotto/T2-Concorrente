@@ -20,11 +20,15 @@ def get_sample(n_process):
     return x[:], y[:]
 
 def graph():
-    x, y = get_sample(10)
-    matplotlib.pyplot.plot(x, y)
+    serial_time = 1
+    matplotlib.pyplot.title('Gráfico speedup')
+    matplotlib.pyplot.xlabel('n_threads')
+    matplotlib.pyplot.ylabel('speedup')
+    for n_process in range(1, 2):
+        x, y = get_sample(n_process)
+        y = [serial_time / t for t in y]
+        matplotlib.pyplot.plot(x, y)
     matplotlib.pyplot.show()
-
-
 
 if __name__ == "__main__":
     graph()

@@ -1,25 +1,23 @@
 import os
-import sys
-import time
 import argparse
 
-from multiprocessing import Process
-from threading import Thread
+from multiprocessing import Process, current_process
+from threading import Thread, current_thread
 
 def get_lines(sudoku):
-    return [{"L"+i: l} for i,l in enumerate(sudoku)]
+    return [[f"L{i + 1}", *line] for i, line in enumerate(sudoku)]
 
 def get_columns(sudoku):
-    return [{"C"+c:[sudoku[l][c] for l in range(len(sudoku))]} for c in range(len(sudoku))]
+    t = [[sudoku[l][c] for l in range(9)] for c in range(9)]
+    return [[f"C{i + 1}", *col] for i, col in enumerate(t)]
 
 def get_regions(sudoku):
-    regions = [[] for _ in range(9)]
+    regions = [[f"R{i + 1}", ] for i in range(9)]
     for r in range(9):
         for l in range((r // 3) * 3, (r // 3) * 3 + 3):
             for c in range((r % 3) * 3, (r % 3) * 3 + 3):
                 regions[r].append(sudoku[l][c])
-
-    return [{"R"+i: r} for i,r in enumerate(regions)]
+    return regions[:]
 
 def work_process(sudokus, n_threads):
     threads = []
@@ -28,26 +26,31 @@ def work_process(sudokus, n_threads):
         sudoku_blocks.extend(get_lines(sudoku))
         sudoku_blocks.extend(get_columns(sudoku))
         sudoku_blocks.extend(get_regions(sudoku))
-        q = 27 // n_threads
-        r = 27 % n_threads
-        begin = 0
-        end = q
-        for _ in range(n_threads):
-            if r:
-                end+=1
-                r-=1
-            thread = Thread(target=work_threads, args=(sudoku_blocks[begin:end],))
+        
+        print(f"{current_process().name}: resolvendo quebra-cabeças {i + 1}")
+        thread_block = [[] for _ in range(len(sudoku_blocks))]
+        [thread_block[j % n_threads].append(blocks) for j, blocks in enumerate(sudoku_blocks)]
+        errors = {}
+        for k in range(n_threads):
+            thread = Thread(name=f"T{k}", target=work_threads, args=(thread_block[k][:], errors,))
             thread.start()
             threads.append(thread)
-            begin = end
-            end += q
+
         for thread in threads:
             thread.join()
+        
+        dict_size = sum([len(errors[k]) for k in errors.keys()])
+        msg_error = f"{current_process().name}: {dict_size} erros encontrados "
+        if dict_size:
+            msg_error += "(" + "; ".join([t + ": " + ", ".join(errors[t]) for t in errors.keys()]) + ")"
+        print(msg_error)
 
-def work_threads(blocks):
+def work_threads(blocks, errors):
+    name = current_thread().name
+    errors[name] = []
     for block in blocks:
-        if set(block) != {1,2,3,4,5,6,7,8,9}:
-            pass
+        if set(block[1:]) != {1,2,3,4,5,6,7,8,9}:
+            errors[name].append(block[0])
 
 def pos_int(value):
     pos_i = int(value)
@@ -87,7 +90,7 @@ def main():
     [process_sudokus[i % args.num_process].append(sudoku) for i, sudoku in enumerate(sudokus)]
 
     # Iniciando os processos
-    process = [Process(target=work_process, args=(p_s, args.num_threads)) for p_s in process_sudokus]
+    process = [Process(name=f"Processo {i + 1}", target=work_process, args=(p_s, args.num_threads)) for i, p_s in enumerate(process_sudokus)]
     for p in process:
         p.start()
 

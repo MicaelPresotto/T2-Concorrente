@@ -9,10 +9,10 @@ from serial import serial_solution
 def get_sample(n_process):
     x = []
     y = []
-    MAX_THREAD = 10    
+    MAX_THREAD = 3    
     for n_thread in range(1, MAX_THREAD + 1):
         start = time.time()
-        sys.argv = ["python", "-f", "input-sample.txt", "-p", f"{n_process}", "-t", f"{n_thread}", "-e", "False"]
+        sys.argv = ["python", "-f", "input-big.txt", "-p", f"{n_process}", "-t", f"{n_thread}", "-e", "False"]
         concurrent_solution()
         end = time.time()
         x.append(n_thread)
@@ -22,7 +22,7 @@ def get_sample(n_process):
 
 def graph():
     start = time.time()
-    sys.argv = ["python", "-f", "input-sample.txt", "-e", "False"]
+    sys.argv = ["python", "-f", "input-big.txt", "-e", "False"]
     serial_solution()
     end = time.time()
     serial_time = end - start
@@ -31,7 +31,7 @@ def graph():
     matplotlib.pyplot.title('Gráfico speedup')
     matplotlib.pyplot.xlabel('n_threads')
     matplotlib.pyplot.ylabel('speedup')
-    for n_process in range(1, 11):
+    for n_process in range(3, 10):
         x, y = get_sample(n_process)
         for n_thread, t in zip(x, y):
             print(f"Tempo T({n_process}, {n_thread}): ", t)

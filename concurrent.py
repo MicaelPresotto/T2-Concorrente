@@ -1,82 +1,54 @@
 import os
 import argparse
-from time import time
 
 from multiprocessing import Process, current_process
-from threading import Thread, current_thread, Lock
+from threading import Thread, current_thread
 from distutils.util import strtobool
 from utils import *
 
-dones = 0
-start = 0
-
-def get_errors(blocks):
-    pass
 
 def work_process(sudokus, n_threads, shift, enable_output):
     threads = []
-    blocks_per_sudokus = [[] for _ in sudokus]
-    blocks_per_sudokus_per_thread = [[[] for __ in range(n_threads)] for _ in sudokus]
 
     for i, sudoku in enumerate(sudokus):
-        blocks_per_sudokus[i].extend(get_rows(sudoku))
-        blocks_per_sudokus[i].extend(get_columns(sudoku))
-        blocks_per_sudokus[i].extend(get_regions(sudoku))
+        
+        if enable_output:
+            print(f"{current_process().name}: resolvendo quebra-cabeças {i + shift + 1}")
+    
+        blocks = []
+        blocks.extend(get_rows(sudoku))
+        blocks.extend(get_columns(sudoku))
+        blocks.extend(get_regions(sudoku))
 
         q = 27 // n_threads
         r = 27 % n_threads
         start = 0
+        errors = [[] for _ in range(n_threads)]
         for k in range(n_threads):
-            amount_sudokus = q
+            amount_blocks = q
             if r:
                 r -= 1
-                amount_sudokus += 1
-            blocks_per_sudokus_per_thread[i][k] = blocks_per_sudokus[i][start:start+amount_sudokus]
-            start += amount_sudokus
+                amount_blocks += 1
+            thread = Thread(name=f"T{k + 1}", target=work_threads, args=(blocks[start:start+amount_blocks], errors[k]))
+            thread.start()
+            threads.append(thread)
+            start += amount_blocks
 
-    locks = [Lock() for _ in range(n_threads)]
-    lock_dones = Lock()
-    lock_start = Lock()
-    errors = [[] for _ in range(n_threads)]
-    for k in range(n_threads):
-        thread = Thread(name=f"T{k + 1}", target=work_threads, args=([blocks_per_sudokus_per_thread[i][k] for i in range(len(sudokus))], shift, enable_output, locks, lock_dones, lock_start, errors))
-        thread.start()
-        threads.append(thread)
-
-    for i, thread in enumerate(threads):
-        thread.join()
-
-def work_threads(blocks_per_sudoku, shift, enable_output, locks, lock_done, lock_start, errors):
-    global start
-    global dones
-    for i, blocks in enumerate(blocks_per_sudoku):
+        for i, thread in enumerate(threads):
+            thread.join()
 
         if enable_output:
-            with lock_start:
-                if start == 0:
-                    print(f"{current_process().name}: resolvendo quebra-cabeças {i + shift + 1}")
-                start += 1
-        locks[int(current_thread().name[1:]) - 1].acquire()
+            print_concurrent_errors(errors, current_process().name)
 
-        for block in blocks:
-            if set(block[1:]) != {1,2,3,4,5,6,7,8,9}:
-                errors[int(current_thread().name[1:]) - 1].append(block[0])
-        aux = [e.replace("L", "A") for e in errors[int(current_thread().name[1:]) - 1]]
-        aux.sort()
-        aux = [e.replace("A", "L") for e in aux]
-        errors[int(current_thread().name[1:]) - 1] = aux[:]
-
-        with lock_done:
-            dones += 1
-            if dones == len(locks):
-                if enable_output:
-                    print_concurrent_errors(errors, current_process().name)
-                for lock in locks:
-                    lock.release()
-                for error in errors:
-                    error.clear()
-                dones = 0
-                start = 0
+def work_threads(blocks, errors):
+    index = int(current_thread().name[1:])
+    for block in blocks:
+        if set(block[1:]) != {1,2,3,4,5,6,7,8,9}:
+            errors.append(block[0])
+    aux = [e.replace("L", "A") for e in errors]
+    aux.sort()
+    aux = [e.replace("A", "L") for e in aux]
+    errors = aux[:]
 
 def pos_int(value):
     pos_i = int(value)
@@ -120,15 +92,14 @@ def concurrent_solution():
     r = len(sudokus) % args.num_process
     start = 0
     for i in range(args.num_process):
-        print(i)
         amount_sudokus = q
         if r:
             r -= 1
             amount_sudokus += 1
         p = Process(name=f"Processo {i + 1}", target=work_process, args=(sudokus[start:start+amount_sudokus], args.num_threads, start, args.enable_output,))
         p.start()
-        start += amount_sudokus
         process.append(p)
+        start += amount_sudokus
 
     for p in process:
         p.join()

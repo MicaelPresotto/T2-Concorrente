@@ -5,10 +5,7 @@ from utils import *
 
 def worker(sudokus, enable_output):
     for i, sudoku in enumerate(sudokus):
-        blocks = []
-        blocks.extend(get_rows(sudoku))
-        blocks.extend(get_columns(sudoku))
-        blocks.extend(get_regions(sudoku))
+        blocks = get_blocks(sudoku)
         
         if enable_output:
             print(f"Processo main: resolvendo quebra-cabeças {i}")

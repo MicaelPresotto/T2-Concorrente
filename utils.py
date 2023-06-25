@@ -42,6 +42,21 @@ def get_errors(blocks):
             errors.append(block[0])
     return errors[:]
 
+def divide_jobs(jobs, number):
+    division = []
+    number_jobs = len(jobs)
+    q = number_jobs // number
+    r = number_jobs % number
+    start = 0
+    for _ in range(number):
+        k = q
+        if r:
+            r -= 1
+            k += 1
+        division.append(jobs[start:start+k])
+        start += k
+    return division[:]
+
 def print_concurrent_errors(errors, process_name):
     dict_size = sum([len(error) for error in errors])
     msg_error = f"{process_name}: {dict_size} erros encontrados "

@@ -19,19 +19,12 @@ def work_process(sudokus, n_threads, shift, enable_output):
         blocks.extend(get_columns(sudoku))
         blocks.extend(get_regions(sudoku))
 
-        q = 27 // n_threads
-        r = 27 % n_threads
-        start = 0
         errors = [[] for _ in range(n_threads)]
+        jobs = divide_jobs(blocks, n_threads)
         for k in range(n_threads):
-            amount_blocks = q
-            if r:
-                r -= 1
-                amount_blocks += 1
-            thread = Thread(name=f"T{k + 1}", target=work_threads, args=(blocks[start:start+amount_blocks], errors[k]))
+            thread = Thread(name=f"T{k + 1}", target=work_threads, args=(jobs[k], errors[k]))
             thread.start()
             threads.append(thread)
-            start += amount_blocks
 
         for i, thread in enumerate(threads):
             thread.join()
@@ -64,18 +57,11 @@ def concurrent_solution_v1():
 
     # Fazendo a divisao de trabalho das threads
     process = []
-    q = len(sudokus) // args.num_process
-    r = len(sudokus) % args.num_process
-    start = 0
+    jobs = divide_jobs(sudokus, args.num_process)
     for i in range(args.num_process):
-        amount_sudokus = q
-        if r:
-            r -= 1
-            amount_sudokus += 1
-        p = Process(name=f"Processo {i + 1}", target=work_process, args=(sudokus[start:start+amount_sudokus], args.num_threads, start, args.enable_output,))
+        p = Process(name=f"Processo {i + 1}", target=work_process, args=(jobs[i], args.num_threads, sum([len(job) for job in jobs[:i]]), args.enable_output,))
         p.start()
         process.append(p)
-        start += amount_sudokus
 
     for p in process:
         p.join()

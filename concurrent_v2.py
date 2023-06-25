@@ -18,16 +18,9 @@ def work_process(sudokus, n_threads, shift, enable_output):
         blocks_per_sudokus[i].extend(get_columns(sudoku))
         blocks_per_sudokus[i].extend(get_regions(sudoku))
 
-        q = 27 // n_threads
-        r = 27 % n_threads
-        start = 0
+        jobs = divide_jobs(blocks_per_sudokus[i], n_threads)
         for k in range(n_threads):
-            amount_sudokus = q
-            if r:
-                r -= 1
-                amount_sudokus += 1
-            blocks_per_sudokus_per_thread[i][k] = blocks_per_sudokus[i][start:start+amount_sudokus]
-            start += amount_sudokus
+            blocks_per_sudokus_per_thread[i][k] = jobs[k]
 
     locks = [Lock() for _ in range(n_threads)]
     lock_dones = Lock()
@@ -84,23 +77,16 @@ def concurrent_solution_v2():
         exit(1)
 
     sudokus = read_sudokus(args.file_name)
-           
+
     if args.num_process > len(sudokus):
         args.num_process = len(sudokus)
 
     # Fazendo a divisao de trabalho das threads
     process = []
-    q = len(sudokus) // args.num_process
-    r = len(sudokus) % args.num_process
-    start = 0
+    jobs = divide_jobs(sudokus, args.num_process)
     for i in range(args.num_process):
-        amount_sudokus = q
-        if r:
-            r -= 1
-            amount_sudokus += 1
-        p = Process(name=f"Processo {i + 1}", target=work_process, args=(sudokus[start:start+amount_sudokus], args.num_threads, start, args.enable_output,))
+        p = Process(name=f"Processo {i + 1}", target=work_process, args=(jobs[i], args.num_threads, sum([len(job) for job in jobs[:i]]), args.enable_output,))
         p.start()
-        start += amount_sudokus
         process.append(p)
 
     for p in process:

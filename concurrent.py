@@ -51,12 +51,12 @@ def work_threads(blocks_per_sudoku, shift, enable_output, locks, lock_done, lock
     global dones
     for i, blocks in enumerate(blocks_per_sudoku):
 
+        locks[int(current_thread().name[1:]) - 1].acquire()
         if enable_output:
             with lock_start:
                 if start == 0:
                     print(f"{current_process().name}: resolvendo quebra-cabeças {i + shift + 1}")
                 start += 1
-        locks[int(current_thread().name[1:]) - 1].acquire()
 
         for block in blocks:
             if set(block[1:]) != {1,2,3,4,5,6,7,8,9}:
@@ -69,14 +69,15 @@ def work_threads(blocks_per_sudoku, shift, enable_output, locks, lock_done, lock
         with lock_done:
             dones += 1
             if dones == len(locks):
+                dones = 0
+                with lock_start:
+                    start = 0
                 if enable_output:
                     print_concurrent_errors(errors, current_process().name)
-                for lock in locks:
-                    lock.release()
                 for error in errors:
                     error.clear()
-                dones = 0
-                start = 0
+                for lock in locks:
+                    lock.release()
 
 def pos_int(value):
     pos_i = int(value)
@@ -98,7 +99,7 @@ def concurrent_solution():
     parser.add_argument('-f', '--file-name', action='store', type=valid_file, required=True, help='O nome do arquivo com as solucoes a serem validadas')
     parser.add_argument('-p', '--num-process', action='store', type=pos_int, required=True, help='O numero de processos trabalhadores')
     parser.add_argument('-t', '--num-threads', action='store', type=pos_int, required=True, help='O numero de threads de correcao a serem utilizadas por cada processo trabalhador')
-    parser.add_argument('-e', '--enable_output', action="store", type=lambda x:bool(strtobool(x)), required=False, default=True,  help='Ativa oudesativa so prints')
+    parser.add_argument('-e', '--enable-output', action="store", type=lambda x:bool(strtobool(x)), required=False, default=True,  help='Ativa oudesativa so prints')
     # Tratando eventuais erros de entrada
     try:
         args = parser.parse_args()
@@ -120,7 +121,6 @@ def concurrent_solution():
     r = len(sudokus) % args.num_process
     start = 0
     for i in range(args.num_process):
-        print(i)
         amount_sudokus = q
         if r:
             r -= 1

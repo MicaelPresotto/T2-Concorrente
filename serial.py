@@ -49,4 +49,4 @@ def serial_solution():
     worker(sudokus, args.enable_output)
 
 if __name__ == "__main__":
-    serial_solution())
+    serial_solution()

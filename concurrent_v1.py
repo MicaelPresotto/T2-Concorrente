@@ -14,11 +14,7 @@ def work_process(sudokus, n_threads, shift, enable_output):
         if enable_output:
             print(f"{current_process().name}: resolvendo quebra-cabeças {i + shift + 1}")
     
-        blocks = []
-        blocks.extend(get_rows(sudoku))
-        blocks.extend(get_columns(sudoku))
-        blocks.extend(get_regions(sudoku))
-
+        blocks = get_blocks(sudoku)
         errors = [[] for _ in range(n_threads)]
         jobs = divide_jobs(blocks, n_threads)
         for k in range(n_threads):

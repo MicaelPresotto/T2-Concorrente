@@ -14,9 +14,7 @@ def work_process(sudokus, n_threads, shift, enable_output):
     blocks_per_sudokus_per_thread = [[[] for __ in range(n_threads)] for _ in sudokus]
 
     for i, sudoku in enumerate(sudokus):
-        blocks_per_sudokus[i].extend(get_rows(sudoku))
-        blocks_per_sudokus[i].extend(get_columns(sudoku))
-        blocks_per_sudokus[i].extend(get_regions(sudoku))
+        blocks_per_sudokus[i] = get_blocks(sudoku)
 
         jobs = divide_jobs(blocks_per_sudokus[i], n_threads)
         for k in range(n_threads):

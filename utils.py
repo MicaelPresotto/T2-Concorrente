@@ -35,6 +35,9 @@ def get_regions(sudoku):
                 regions[r].append(sudoku[l][c])
     return regions[:]
 
+def get_blocks(sudoku):
+    return [*get_rows(sudoku), *get_columns(sudoku), *get_regions(sudoku)]
+
 def get_errors(blocks):
     errors = []
     for block in blocks:

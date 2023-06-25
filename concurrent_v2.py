@@ -1,6 +1,4 @@
-import os
 import argparse
-from time import time
 
 from multiprocessing import Process, current_process
 from threading import Thread, current_thread, Lock
@@ -9,9 +7,6 @@ from utils import *
 
 dones = 0
 start = 0
-
-def get_errors(blocks):
-    pass
 
 def work_process(sudokus, n_threads, shift, enable_output):
     threads = []
@@ -57,14 +52,8 @@ def work_threads(blocks_per_sudoku, shift, enable_output, locks, lock_done, lock
                 if start == 0:
                     print(f"{current_process().name}: resolvendo quebra-cabeças {i + shift + 1}")
                 start += 1
-
-        for block in blocks:
-            if set(block[1:]) != {1,2,3,4,5,6,7,8,9}:
-                errors[int(current_thread().name[1:]) - 1].append(block[0])
-        aux = [e.replace("L", "A") for e in errors[int(current_thread().name[1:]) - 1]]
-        aux.sort()
-        aux = [e.replace("A", "L") for e in aux]
-        errors[int(current_thread().name[1:]) - 1] = aux[:]
+    
+        errors[int(current_thread().name[1:]) - 1] = [e.replace("A", "L") for e in sorted([e.replace("L", "A") for e in get_errors(blocks)])]
 
         with lock_done:
             dones += 1

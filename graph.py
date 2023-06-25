@@ -25,8 +25,8 @@ def graph():
     parser = argparse.ArgumentParser(add_help=True, description='Gráfico do speedup')
 
     parser.add_argument('-f', '--file-name', action='store', type=valid_file, required=True, help='O nome do arquivo com as solucoes a serem validadas')
-    parser.add_argument('-p', '--max-process', action='store', type=pos_int, required=True, help='O numero de processos trabalhadores')
-    parser.add_argument('-t', '--max-threads', action='store', type=pos_int, required=True, help='O numero de threads de correcao a serem utilizadas por cada processo trabalhador')
+    parser.add_argument('-p', '--max-process', action='store', type=pos_int, required=True, help='O numero máximo de processos trabalhadores')
+    parser.add_argument('-t', '--max-threads', action='store', type=pos_int, required=True, help='O numero máximo de threads de correcao a serem utilizadas por cada processo trabalhador')
 
     try:
         args = parser.parse_args()

@@ -1,33 +1,22 @@
-import os
 import argparse
-from time import time
+
 from distutils.util import strtobool
 from utils import *
-from time import time
 
 def worker(sudokus, enable_output):
     for i, sudoku in enumerate(sudokus):
-        errors = []
-        sudoku_blocks = []
-        sudoku_blocks.extend(get_rows(sudoku))
-        sudoku_blocks.extend(get_columns(sudoku))
-        sudoku_blocks.extend(get_regions(sudoku))
+        blocks = []
+        blocks.extend(get_rows(sudoku))
+        blocks.extend(get_columns(sudoku))
+        blocks.extend(get_regions(sudoku))
         
         if enable_output:
             print(f"Processo main: resolvendo quebra-cabeças {i}")
 
-        for block in sudoku_blocks:
-            if set(block[1:]) != {1,2,3,4,5,6,7,8,9}:
-                    errors.append(block[0])
+        errors = get_errors(blocks)
 
         if enable_output:
             print_serial_errors(errors[:])
-
-def valid_file(file):
-    if not os.path.exists(file):
-        msg = "Valor recebido %s. Arquivo nao existe!" % file
-        raise argparse.ArgumentTypeError(msg)
-    return file
 
 def sequential_solution():
     parser = argparse.ArgumentParser(add_help=True, description='Verificador de Sudoku Concorrente em Python')

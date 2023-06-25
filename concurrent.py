@@ -134,7 +134,4 @@ def concurrent_solution():
         p.join()
 
 if __name__ == "__main__":
-    start = time()
     concurrent_solution()
-    end = time()
-    print("Time:", end - start)

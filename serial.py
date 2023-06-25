@@ -49,7 +49,4 @@ def serial_solution():
     worker(sudokus, args.enable_output)
 
 if __name__ == "__main__":
-    start = time()
-    serial_solution()
-    end = time()
-    print("Time: ", end - start)
+    serial_solution())

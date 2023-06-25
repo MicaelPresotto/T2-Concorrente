@@ -79,20 +79,7 @@ def work_threads(blocks_per_sudoku, shift, enable_output, locks, lock_done, lock
                 for lock in locks:
                     lock.release()
 
-def pos_int(value):
-    pos_i = int(value)
-    if pos_i < 1:
-        msg = "Valor recebido %s. Tente um valor > 0!" % value
-        raise argparse.ArgumentTypeError(msg)
-    return pos_i
-
-def valid_file(file):
-    if not os.path.exists(file):
-        msg = "Valor recebido %s. Arquivo nao existe!" % file
-        raise argparse.ArgumentTypeError(msg)
-    return file
-
-def concurrent_solution():
+def concurrent_solution_v2():
     # Definindo os parametros do programa
     parser = argparse.ArgumentParser(add_help=True, description='Verificador de Sudoku Concorrente em Python')
 
@@ -134,4 +121,4 @@ def concurrent_solution():
         p.join()
 
 if __name__ == "__main__":
-    concurrent_solution()
+    concurrent_solution_v2()

@@ -29,7 +29,7 @@ def valid_file(file):
         raise argparse.ArgumentTypeError(msg)
     return file
 
-def serial_solution():
+def sequential_solution():
     parser = argparse.ArgumentParser(add_help=True, description='Verificador de Sudoku Concorrente em Python')
 
     parser.add_argument('-f', '--file-name', action='store', type=valid_file, required=True, help='O nome do arquivo com as solucoes a serem validadas')
@@ -50,4 +50,4 @@ def serial_solution():
     worker(sudokus, args.enable_output)
 
 if __name__ == "__main__":
-    serial_solution()
+    sequential_solution()

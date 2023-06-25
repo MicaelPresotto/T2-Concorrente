@@ -9,17 +9,14 @@ def work_process(sudokus, n_threads, shift, enable_output):
     threads = []
 
     for i, sudoku in enumerate(sudokus):
-        
         if enable_output:
             print(f"{current_process().name}: resolvendo quebra-cabeças {i + shift + 1}")
     
-        blocks = get_blocks(sudoku)
         errors = [[] for _ in range(n_threads)]
-        jobs = divide_jobs(blocks, n_threads)
+        jobs = divide_jobs(get_blocks(sudoku), n_threads)
         for k in range(n_threads):
-            thread = Thread(name=f"T{k + 1}", target=work_threads, args=(jobs[k], errors[k]))
-            thread.start()
-            threads.append(thread)
+            threads.append(Thread(name=f"T{k + 1}", target=work_threads, args=(jobs[k], errors[k])))
+            threads[-1].start()
 
         for i, thread in enumerate(threads):
             thread.join()
@@ -54,9 +51,8 @@ def concurrent_solution_v1():
     process = []
     jobs = divide_jobs(sudokus, args.num_process)
     for i in range(args.num_process):
-        p = Process(name=f"Processo {i + 1}", target=work_process, args=(jobs[i], args.num_threads, sum([len(job) for job in jobs[:i]]), args.enable_output,))
-        p.start()
-        process.append(p)
+        process.append(Process(name=f"Processo {i + 1}", target=work_process, args=(jobs[i], args.num_threads, sum([len(job) for job in jobs[:i]]), args.enable_output,)))
+        process[-1].start()
 
     for p in process:
         p.join()

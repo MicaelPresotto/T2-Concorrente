@@ -5,12 +5,11 @@ from utils import *
 
 def worker(sudokus, enable_output):
     for i, sudoku in enumerate(sudokus):
-        blocks = get_blocks(sudoku)
         
         if enable_output:
             print(f"Processo main: resolvendo quebra-cabeças {i}")
 
-        errors = get_errors(blocks)
+        errors = get_errors(get_blocks(sudoku))
 
         if enable_output:
             print_serial_errors(errors[:])

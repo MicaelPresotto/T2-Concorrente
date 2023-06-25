@@ -8,25 +8,19 @@ dones = 0
 start = 0
 
 def work_process(sudokus, n_threads, shift, enable_output):
-    threads = []
-    blocks_per_sudokus = [[] for _ in sudokus]
     blocks_per_sudokus_per_thread = [[[] for __ in range(n_threads)] for _ in sudokus]
-
     for i, sudoku in enumerate(sudokus):
-        blocks_per_sudokus[i] = get_blocks(sudoku)
+        for k, job in enumerate(divide_jobs(get_blocks(sudoku), n_threads)):
+            blocks_per_sudokus_per_thread[i][k] = job
 
-        jobs = divide_jobs(blocks_per_sudokus[i], n_threads)
-        for k in range(n_threads):
-            blocks_per_sudokus_per_thread[i][k] = jobs[k]
-
+    threads = []
     locks = [Lock() for _ in range(n_threads)]
     lock_dones = Lock()
     lock_start = Lock()
     errors = [[] for _ in range(n_threads)]
     for k in range(n_threads):
-        thread = Thread(name=f"T{k + 1}", target=work_threads, args=([blocks_per_sudokus_per_thread[i][k] for i in range(len(sudokus))], shift, enable_output, locks, lock_dones, lock_start, errors))
-        thread.start()
-        threads.append(thread)
+        threads.append(Thread(name=f"T{k + 1}", target=work_threads, args=([blocks_per_sudokus_per_thread[i][k] for i in range(len(sudokus))], shift, enable_output, locks, lock_dones, lock_start, errors)))
+        threads[-1].start()
 
     for i, thread in enumerate(threads):
         thread.join()
@@ -35,7 +29,6 @@ def work_threads(blocks_per_sudoku, shift, enable_output, locks, lock_done, lock
     global start
     global dones
     for i, blocks in enumerate(blocks_per_sudoku):
-
         locks[int(current_thread().name[1:]) - 1].acquire()
         if enable_output:
             with lock_start:
@@ -82,9 +75,8 @@ def concurrent_solution_v2():
     process = []
     jobs = divide_jobs(sudokus, args.num_process)
     for i in range(args.num_process):
-        p = Process(name=f"Processo {i + 1}", target=work_process, args=(jobs[i], args.num_threads, sum([len(job) for job in jobs[:i]]), args.enable_output,))
-        p.start()
-        process.append(p)
+        process.append(Process(name=f"Processo {i + 1}", target=work_process, args=(jobs[i], args.num_threads, sum([len(job) for job in jobs[:i]]), args.enable_output,)))
+        process[-1].start()
 
     for p in process:
         p.join()

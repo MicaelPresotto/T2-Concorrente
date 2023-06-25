@@ -2,7 +2,6 @@ import argparse
 
 from multiprocessing import Process, current_process
 from threading import Thread, current_thread, Lock
-from distutils.util import strtobool
 from utils import *
 
 dones = 0
@@ -66,7 +65,7 @@ def concurrent_solution_v2():
     parser.add_argument('-f', '--file-name', action='store', type=valid_file, required=True, help='O nome do arquivo com as solucoes a serem validadas')
     parser.add_argument('-p', '--num-process', action='store', type=pos_int, required=True, help='O numero de processos trabalhadores')
     parser.add_argument('-t', '--num-threads', action='store', type=pos_int, required=True, help='O numero de threads de correcao a serem utilizadas por cada processo trabalhador')
-    parser.add_argument('-e', '--enable-output', action="store", type=lambda x:bool(strtobool(x)), required=False, default=True,  help='Ativa oudesativa so prints')
+    parser.add_argument('-e', '--enable-output', action="store", type=valid_bool, required=False, default=True,  help='Ativa oudesativa so prints')
     # Tratando eventuais erros de entrada
     try:
         args = parser.parse_args()

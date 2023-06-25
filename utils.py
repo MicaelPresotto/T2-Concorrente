@@ -1,6 +1,8 @@
 import os
 import argparse
 
+from distutils.util import strtobool
+
 def pos_int(value):
     pos_i = int(value)
     if pos_i < 1:
@@ -13,6 +15,9 @@ def valid_file(file):
         msg = "Valor recebido %s. Arquivo nao existe!" % file
         raise argparse.ArgumentTypeError(msg)
     return file
+
+def valid_bool(b):
+    return bool(strtobool(b))
 
 def read_sudokus(file):
     sudokus = []

@@ -14,6 +14,12 @@ def valid_file(file):
         raise argparse.ArgumentTypeError(msg)
     return file
 
+def read_sudokus(file):
+    sudokus = []
+    with open(file) as file:
+        sudokus = [[[int(e) for e in line] for line in sudoku.split("\n")] for sudoku in file.read().split("\n\n")]
+    return sudokus
+
 def get_rows(sudoku):
     return [[f"L{i + 1}", *line] for i, line in enumerate(sudoku)]
 

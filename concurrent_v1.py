@@ -57,10 +57,7 @@ def concurrent_solution_v1():
         print(e)
         exit(1)
 
-    # Lendo as matrizes de sudokus
-    sudokus = []
-    with open(args.file_name) as file:
-        sudokus = [[[int(e) for e in line] for line in sudoku.split("\n")] for sudoku in file.read().split("\n\n")]
+    sudokus = read_sudokus(args.file_name)
 
     if args.num_process > len(sudokus):
         args.num_process = len(sudokus)

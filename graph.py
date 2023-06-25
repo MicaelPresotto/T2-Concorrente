@@ -40,9 +40,13 @@ def graph():
     sequential_solution()
     end = time.time()
     sequential_time = end - start
+
+    sudokus = len(read_sudokus(args.file_name))
+
+    print(f"Número de sudokus {sudokus}")
     print("Tempo de referência T(1): ", sequential_time)
 
-    matplotlib.pyplot.title('Gráfico speedup')
+    matplotlib.pyplot.title(f'Gráfico speedup (número de sudokus {sudokus})')
     matplotlib.pyplot.xlabel('n_threads')
     matplotlib.pyplot.ylabel('speedup')
     for n_process in range(1, args.max_process + 1):

@@ -22,14 +22,8 @@ def worker(sudokus, enable_output):
         if enable_output:
             print_serial_errors(errors[:])
 
-def valid_file(file):
-    if not os.path.exists(file):
-        msg = "Valor recebido %s. Arquivo nao existe!" % file
-        raise argparse.ArgumentTypeError(msg)
-    return file
-
 def serial_solution():
-    parser = argparse.ArgumentParser(add_help=True, description='Verificador de Sudoku Concorrente em Python')
+    parser = argparse.ArgumentParser(add_help=True, description='Verificador de Sudoku Serial em Python')
 
     parser.add_argument('-f', '--file-name', action='store', type=valid_file, required=True, help='O nome do arquivo com as solucoes a serem validadas')
     parser.add_argument('-e', '--enable_output', action="store", type=lambda x:bool(strtobool(x)), required=False, default=True,  help='Ativa oudesativa so prints')
@@ -49,4 +43,4 @@ def serial_solution():
     worker(sudokus, args.enable_output)
 
 if __name__ == "__main__":
-    serial_solution())
+    serial_solution()

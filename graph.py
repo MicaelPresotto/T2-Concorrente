@@ -39,8 +39,8 @@ def graph():
     sys.argv = ["python", "-f", args.file_name, "-e", "False"]
     sequential_solution()
     end = time.time()
-    serial_time = end - start
-    print("Tempo de referência T(1): ", serial_time)
+    sequential_time = end - start
+    print("Tempo de referência T(1): ", sequential_time)
 
     matplotlib.pyplot.title('Gráfico speedup')
     matplotlib.pyplot.xlabel('n_threads')
@@ -49,7 +49,7 @@ def graph():
         x, y = get_sample(n_process, args.file_name, args.max_threads)
         for n_thread, t in zip(x, y):
             print(f"Tempo T({n_process}, {n_thread}): ", t)
-        y = [serial_time / t for t in y]
+        y = [sequential_time / t for t in y]
         matplotlib.pyplot.plot(x, y, label=f'Processos: {n_process}')
         
     matplotlib.pyplot.legend()

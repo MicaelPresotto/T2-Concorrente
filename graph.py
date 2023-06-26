@@ -3,8 +3,7 @@ import time
 import argparse
 import matplotlib.pyplot
 
-from concurrent_v1 import concurrent_solution_v1
-from concurrent_v2 import concurrent_solution_v2
+from concurrent import concurrent_solution_v2
 from sequential import sequential_solution
 from utils import *
 
@@ -14,7 +13,7 @@ def get_sample(n_process, file, max_threads):
     y = []    
     for n_thread in range(1, max_threads + 1):
         start = time.time()
-        sys.argv = ["python", "-f", file, "-p", str(n_process), "-t", str(n_thread), "-e", "False"]
+        sys.argv = ["python", file, str(n_process), str(n_thread), "False"]
         concurrent_solution_v2()
         end = time.time()
         x.append(n_thread)
@@ -36,7 +35,7 @@ def graph():
         exit(1)
 
     start = time.time()
-    sys.argv = ["python", "-f", args.file_name, "-e", "False"]
+    sys.argv = ["python", args.file_name, "False"]
     sequential_solution()
     end = time.time()
     sequential_time = end - start

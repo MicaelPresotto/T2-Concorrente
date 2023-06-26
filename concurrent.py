@@ -26,8 +26,7 @@ def work_process(sudokus, n_threads, shift, enable_output):
         thread.join()
 
 def work_threads(blocks_per_sudoku, shift, enable_output, locks, lock_done, lock_start, errors):
-    global start
-    global dones
+    global start, dones
     for i, blocks in enumerate(blocks_per_sudoku):
         locks[int(current_thread().name[1:]) - 1].acquire()
         if enable_output:

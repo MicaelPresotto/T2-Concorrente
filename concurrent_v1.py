@@ -1,4 +1,4 @@
-import argparse
+import sys
 
 from multiprocessing import Process, current_process
 from threading import Thread
@@ -29,29 +29,29 @@ def work_threads(blocks, errors):
 
 def concurrent_solution_v1():
     # Definindo os parametros do programa
-    parser = argparse.ArgumentParser(add_help=True, description='Verificador de Sudoku Concorrente em Python')
-
-    parser.add_argument('-f', '--file-name', action='store', type=valid_file, required=True, help='O nome do arquivo com as solucoes a serem validadas')
-    parser.add_argument('-p', '--num-process', action='store', type=pos_int, required=True, help='O numero de processos trabalhadores')
-    parser.add_argument('-t', '--num-threads', action='store', type=pos_int, required=True, help='O numero de threads de correcao a serem utilizadas por cada processo trabalhador')
-    parser.add_argument('-e', '--enable-output', action="store", type=valid_bool, required=False, default=True,  help='Ativa ou desativa os prints')
-    # Tratando eventuais erros de entrada
     try:
-        args = parser.parse_args()
-    except Exception as e:
+        if len(sys.argv) < 5:
+                raise IndexError("Passou menos argumentos do que esperado!")
+        elif len(sys.argv) > 5:
+            raise IndexError("Passou mais argumentos do que esperado")
+        file_name = valid_file(sys.argv[1])
+        num_process = pos_int(sys.argv[2])
+        num_threads = pos_int(sys.argv[3])
+        enable_output = valid_bool(sys.argv[4])
+    except IndexError as e:
         print(e)
-        exit(1)
+        sys.exit()
 
-    sudokus = read_sudokus(args.file_name)
+    sudokus = read_sudokus(file_name)
 
-    if args.num_process > len(sudokus):
-        args.num_process = len(sudokus)
+    if num_process > len(sudokus):
+        num_process = len(sudokus)
 
     # Fazendo a divisao de trabalho das threads
     process = []
-    jobs = divide_jobs(sudokus, args.num_process)
-    for i in range(args.num_process):
-        process.append(Process(name=f"Processo {i + 1}", target=work_process, args=(jobs[i], args.num_threads, sum([len(job) for job in jobs[:i]]), args.enable_output,)))
+    jobs = divide_jobs(sudokus, num_process)
+    for i in range(num_process):
+        process.append(Process(name=f"Processo {i + 1}", target=work_process, args=(jobs[i], num_threads, sum([len(job) for job in jobs[:i]]), enable_output,)))
         process[-1].start()
 
     for p in process:

@@ -54,14 +54,14 @@ def work_threads(blocks_per_sudoku, shift, enable_output, locks, lock_done, lock
 def concurrent_solution_v2():
     # Definindo os parametros do programa
     try:
-        if len(sys.argv) < 5:
+        if len(sys.argv) < 4:
                 raise IndexError("Passou menos argumentos do que esperado!")
         elif len(sys.argv) > 5:
             raise IndexError("Passou mais argumentos do que esperado")
         file_name = valid_file(sys.argv[1])
         num_process = pos_int(sys.argv[2])
         num_threads = pos_int(sys.argv[3])
-        enable_output = valid_bool(sys.argv[4])
+        enable_output = True if len(sys.argv) == 4 else valid_bool(sys.argv[4])
     except IndexError as e:
         print(e)
         sys.exit()
